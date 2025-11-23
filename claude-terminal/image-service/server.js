@@ -61,12 +61,20 @@ const upload = multer({
     }
 });
 
-// Serve static files (HTML interface)
-app.use(express.static(path.join(__dirname, 'public')));
+// API routes MUST come before static files middleware
+// Otherwise static middleware will intercept API requests
 
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', uploadDir: UPLOAD_DIR });
+});
+
+// Provide ttyd port to frontend
+app.get('/config', (req, res) => {
+    res.json({
+        ttydPort: TTYD_PORT,
+        uploadDir: UPLOAD_DIR
+    });
 });
 
 // Image upload endpoint
@@ -86,14 +94,6 @@ app.post('/upload', upload.single('image'), (req, res) => {
     });
 });
 
-// Provide ttyd port to frontend
-app.get('/config', (req, res) => {
-    res.json({
-        ttydPort: TTYD_PORT,
-        uploadDir: UPLOAD_DIR
-    });
-});
-
 // Proxy endpoint for ttyd terminal
 // This allows ttyd to work through Home Assistant ingress
 // Handles both HTTP and WebSocket connections
@@ -110,6 +110,9 @@ app.use('/terminal', createProxyMiddleware({
     },
     logLevel: 'warn'
 }));
+
+// Serve static files (HTML interface) - MUST be after API routes
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer error handling middleware
 app.use((err, req, res, next) => {
