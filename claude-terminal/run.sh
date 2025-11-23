@@ -281,21 +281,44 @@ start_image_service() {
     export UPLOAD_DIR="${upload_dir}"
 
     # Start the Node.js image service in the background
-    cd /opt/image-service
-    node server.js >> /var/log/image-service.log 2>&1 &
+    cd /opt/image-service || {
+        bashio::log.error "Failed to change to /opt/image-service directory"
+        return 1
+    }
+
+    # Check if server.js exists
+    if [ ! -f "server.js" ]; then
+        bashio::log.error "server.js not found in /opt/image-service"
+        ls -la /opt/image-service
+        return 1
+    fi
+
+    # Check if node_modules exists
+    if [ ! -d "node_modules" ]; then
+        bashio::log.error "node_modules not found! Dependencies may not be installed"
+        bashio::log.info "Attempting to install dependencies..."
+        npm install || bashio::log.error "npm install failed"
+    fi
+
+    # Start with better error logging
+    bashio::log.info "Starting Node.js service..."
+    node server.js 2>&1 | while IFS= read -r line; do
+        bashio::log.info "[Image Service] $line"
+    done &
 
     # Store the PID for potential cleanup
     local image_service_pid=$!
     bashio::log.info "Image service started (PID: ${image_service_pid})"
 
     # Give it a moment to start
-    sleep 2
+    sleep 3
 
     # Check if it's running
     if kill -0 "${image_service_pid}" 2>/dev/null; then
         bashio::log.info "Image service is running successfully"
     else
-        bashio::log.warning "Image service may have failed to start, check /var/log/image-service.log"
+        bashio::log.error "Image service failed to start! Check logs above for errors"
+        return 1
     fi
 }
 
