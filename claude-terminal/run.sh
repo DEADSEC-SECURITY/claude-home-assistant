@@ -41,6 +41,11 @@ init_environment() {
     export ANTHROPIC_CONFIG_DIR="$claude_config_dir"
     export ANTHROPIC_HOME="/data"
 
+    # Get dangerously-skip-permissions configuration
+    local dangerously_skip_permissions
+    dangerously_skip_permissions=$(bashio::config 'dangerously_skip_permissions' 'false')
+    export CLAUDE_DANGEROUS_MODE="$dangerously_skip_permissions"
+
     # Setup persistent package paths (HIGHEST PRIORITY)
     export PATH="$persist_bin:$persist_python/venv/bin:$PATH"
     export LD_LIBRARY_PATH="$persist_lib:${LD_LIBRARY_PATH:-}"
@@ -198,13 +203,22 @@ auto_install_packages() {
 # Determine Claude launch command based on configuration
 get_claude_launch_command() {
     local auto_launch_claude
-    
-    # Get configuration value, default to true for backward compatibility
+    local dangerously_skip_permissions
+    local claude_flags=""
+
+    # Get configuration values
     auto_launch_claude=$(bashio::config 'auto_launch_claude' 'true')
-    
+    dangerously_skip_permissions=$(bashio::config 'dangerously_skip_permissions' 'false')
+
+    # Build Claude flags
+    if [ "$dangerously_skip_permissions" = "true" ]; then
+        claude_flags="--dangerously-skip-permissions"
+        bashio::log.warning "Claude will run with --dangerously-skip-permissions (unrestricted file access)"
+    fi
+
     if [ "$auto_launch_claude" = "true" ]; then
         # Original behavior: auto-launch Claude directly
-        echo "clear && echo 'Welcome to Claude Terminal!' && echo '' && echo 'Starting Claude...' && sleep 1 && node \$(which claude)"
+        echo "clear && echo 'Welcome to Claude Terminal!' && echo '' && echo 'Starting Claude...' && sleep 1 && node \$(which claude) ${claude_flags}"
     else
         # New behavior: show interactive session picker
         if [ -f /usr/local/bin/claude-session-picker ]; then

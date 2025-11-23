@@ -50,6 +50,13 @@ A web-based terminal interface with Claude Code CLI pre-installed and enhanced p
 - **Auto-install Packages**: Configure APK and pip packages to auto-install on startup
 - **Python Virtual Environment**: Isolated Python environment for packages
 - **Simple Commands**: Use `persist-install` for easy package management
+- **Unrestricted Mode**: Option to run Claude with `--dangerously-skip-permissions` for full file access
+
+#### Configuration Options
+- `auto_launch_claude`: Auto-start Claude or show session picker (default: true)
+- `dangerously_skip_permissions`: Enable unrestricted file access (default: false)
+- `persistent_apk_packages`: System packages to auto-install
+- `persistent_pip_packages`: Python packages to auto-install
 
 [Documentation](claude-terminal/DOCS.md)
 

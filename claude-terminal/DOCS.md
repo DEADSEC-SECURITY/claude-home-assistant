@@ -19,7 +19,34 @@ Claude Terminal Pro is an enhanced fork of the original Claude Terminal add-on, 
 
 ## Configuration
 
-No configuration is needed! The add-on uses OAuth authentication, so you'll be prompted to log in to your Anthropic account the first time you use it.
+The add-on offers several configuration options:
+
+### Auto Launch Claude
+- **Default**: `true`
+- When enabled, Claude starts automatically when you open the terminal
+- When disabled, shows an interactive session picker menu
+
+### Dangerously Skip Permissions
+- **Default**: `false`
+- When enabled, Claude runs with `--dangerously-skip-permissions` flag
+- **⚠️ WARNING**: This gives Claude unrestricted file system access
+- Use only if you understand the security implications
+- Useful for advanced users who need full file access
+
+### Persistent Packages
+- Configure APK and pip packages to auto-install on startup
+- Packages are stored in `/data/packages` and survive restarts
+
+**Example Configuration**:
+```yaml
+auto_launch_claude: false
+dangerously_skip_permissions: true
+persistent_apk_packages:
+  - python3
+  - git
+persistent_pip_packages:
+  - requests
+```
 
 Your OAuth credentials are stored in the `/config/claude-config` directory and will persist across add-on updates and restarts, so you won't need to log in again.
 

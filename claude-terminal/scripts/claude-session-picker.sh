@@ -3,6 +3,16 @@
 # Claude Session Picker - Interactive menu for choosing Claude session type
 # Provides options for new session, continue, resume, manual command, or regular shell
 
+# Get Claude flags from environment
+get_claude_flags() {
+    local flags=""
+    if [ "${CLAUDE_DANGEROUS_MODE}" = "true" ]; then
+        flags="--dangerously-skip-permissions"
+        echo "⚠️  Running in DANGEROUS mode (unrestricted file access)" >&2
+    fi
+    echo "$flags"
+}
+
 show_banner() {
     clear
     echo "╔══════════════════════════════════════════════════════════════╗"
@@ -42,38 +52,45 @@ get_user_choice() {
 }
 
 launch_claude_new() {
+    local flags=$(get_claude_flags)
     echo "🚀 Starting new Claude session..."
     sleep 1
-    exec node "$(which claude)"
+    exec node "$(which claude)" $flags
 }
 
 launch_claude_continue() {
+    local flags=$(get_claude_flags)
     echo "⏩ Continuing most recent conversation..."
     sleep 1
-    exec node "$(which claude)" -c
+    exec node "$(which claude)" -c $flags
 }
 
 launch_claude_resume() {
+    local flags=$(get_claude_flags)
     echo "📋 Opening conversation list for selection..."
     sleep 1
-    exec node "$(which claude)" -r
+    exec node "$(which claude)" -r $flags
 }
 
 launch_claude_custom() {
+    local base_flags=$(get_claude_flags)
     echo ""
     echo "Enter your Claude command (e.g., 'claude --help' or 'claude -p \"hello\"'):"
     echo "Available flags: -c (continue), -r (resume), -p (print), --model, etc."
+    if [ "${CLAUDE_DANGEROUS_MODE}" = "true" ]; then
+        echo "Note: --dangerously-skip-permissions will be automatically added"
+    fi
     echo -n "> claude "
     read -r custom_args
-    
+
     if [ -z "$custom_args" ]; then
         echo "No arguments provided. Starting default session..."
         launch_claude_new
     else
-        echo "🚀 Running: claude $custom_args"
+        echo "🚀 Running: claude $custom_args $base_flags"
         sleep 1
         # Use eval to properly handle quoted arguments
-        eval "exec node \$(which claude) $custom_args"
+        eval "exec node \$(which claude) $custom_args $base_flags"
     fi
 }
 
