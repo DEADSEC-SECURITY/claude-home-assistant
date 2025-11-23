@@ -76,7 +76,8 @@ launch_claude_custom() {
     local base_flags=$(get_claude_flags)
     echo ""
     echo "Enter your Claude command (e.g., 'claude --help' or 'claude -p \"hello\"'):"
-    echo "Available flags: -c (continue), -r (resume), -p (print), --model, etc."
+    echo "Available flags: -c (continue), -r (resume), -p (print), --model,"
+    echo "                 --dangerously-skip-permissions, etc."
     if [ "${CLAUDE_DANGEROUS_MODE}" = "true" ]; then
         echo "Note: --dangerously-skip-permissions will be automatically added"
     fi
