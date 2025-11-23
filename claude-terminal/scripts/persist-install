@@ -16,12 +16,14 @@ Install packages that survive container restarts!
 USAGE:
     persist-install <package1> [package2] [...]
     persist-install --python <package1> [package2] [...]
+    persist-install --ha-cli
     persist-install --list
     persist-install --help
 
 EXAMPLES:
     persist-install git vim htop          # Install system packages
     persist-install --python requests pandas  # Install Python packages
+    persist-install --ha-cli              # Install Home Assistant CLI
     persist-install --list                # Show installed packages
 
 NOTES:
@@ -29,10 +31,11 @@ NOTES:
     • Survives container restarts and reboots
     • System packages copied from Alpine APK
     • Python packages installed to virtual environment
+    • Home Assistant CLI downloaded from official GitHub releases
 
 QUICK START:
     1. persist-install python3 py3-pip    # Install Python (first time)
-    2. persist-install --python homeassistant-cli  # Install HA CLI
+    2. persist-install --ha-cli           # Install official HA CLI
     3. Reboot and enjoy! Packages will still be there!
 
 EOF
@@ -144,6 +147,70 @@ install_python_packages() {
     echo "💡 Use 'source $PERSIST_PYTHON/venv/bin/activate' to activate venv"
 }
 
+install_ha_cli() {
+    local HA_VERSION="4.42.0"
+    local BASE_URL="https://github.com/home-assistant/cli/releases/download/${HA_VERSION}"
+
+    # Detect architecture
+    local machine=$(uname -m)
+    local arch=""
+
+    case "$machine" in
+        x86_64)     arch="amd64" ;;
+        aarch64)    arch="aarch64" ;;
+        armv7l)     arch="armv7" ;;
+        armv6l)     arch="armhf" ;;
+        i386|i686)  arch="i386" ;;
+        *)
+            echo "❌ Unsupported architecture: $machine"
+            return 1
+            ;;
+    esac
+
+    local download_url="${BASE_URL}/ha_${arch}"
+    local target_path="${PERSIST_BIN}/ha"
+
+    echo "🏠 Installing Home Assistant CLI v${HA_VERSION}"
+    echo "📦 Architecture: ${arch}"
+    echo ""
+
+    # Check if already installed
+    if [ -x "${target_path}" ]; then
+        echo "ℹ️  Home Assistant CLI is already installed"
+        "${target_path}" --version
+        return 0
+    fi
+
+    # Create directory
+    mkdir -p "$PERSIST_BIN"
+
+    # Download
+    echo "⏳ Downloading from GitHub..."
+    if ! curl -fsSL -o "${target_path}" "${download_url}"; then
+        echo "❌ Failed to download ha CLI binary"
+        return 1
+    fi
+
+    # Make executable
+    chmod +x "${target_path}"
+
+    # Verify
+    if "${target_path}" --version >/dev/null 2>&1; then
+        echo ""
+        echo "✅ Home Assistant CLI installed successfully!"
+        "${target_path}" --version
+        echo ""
+        echo "💡 Try these commands:"
+        echo "   ha core info"
+        echo "   ha addons list"
+        echo "   ha supervisor info"
+    else
+        echo "❌ Downloaded binary is not working"
+        rm -f "${target_path}"
+        return 1
+    fi
+}
+
 # Main execution
 main() {
     # Check if running in the add-on
@@ -168,6 +235,9 @@ main() {
                 exit 1
             fi
             install_python_packages "$@"
+            ;;
+        --ha-cli|ha-cli|ha)
+            install_ha_cli
             ;;
         "")
             show_help

@@ -181,7 +181,10 @@ persist-install python3
 persist-install python3 py3-pip git vim htop
 
 # Install Python packages
-persist-install --python homeassistant-cli requests pandas numpy
+persist-install --python requests pandas numpy
+
+# Install Home Assistant CLI (official ha command)
+persist-install --ha-cli
 
 # List installed packages
 persist-install --list
@@ -227,17 +230,19 @@ Claude: "Python 3.11.x installed successfully! It's stored in /data/packages
 **Another Example**:
 
 ```
-User: "Install homeassistant-cli"
+User: "I want to interact with Home Assistant entities"
 
-Claude (YOU): "I'll install the Home Assistant CLI using persist-install to
-              ensure it persists."
+Claude (YOU): "I'll show you how to use the Supervisor API to interact with
+              Home Assistant. Let me install Python requests library."
 
-[Run]: persist-install --python homeassistant-cli
+[Run]: persist-install --python requests
 
-[Verify]: hass-cli --version
+[Show]: curl -H "Authorization: Bearer $SUPERVISOR_TOKEN" \
+             http://supervisor/core/api/states | jq '.[0]'
 
-Claude: "Home Assistant CLI installed successfully! You can now use commands
-        like 'hass-cli entity list'."
+Claude: "You can interact with Home Assistant using the Supervisor API!
+        Check /opt/scripts/ha-api-examples.sh for more examples, or use
+        Python's requests library for programmatic access."
 ```
 
 ### Proactive Behavior
@@ -270,13 +275,19 @@ Claude: "Home Assistant CLI installed successfully! You can now use commands
 
 **Python Tools**:
 - `python3 py3-pip` - Python and package manager
-- `homeassistant-cli` - Home Assistant CLI
-- `requests` - HTTP library
+- `requests` - HTTP library for API calls
 - `pyyaml` - YAML parser
 - `pandas` - Data analysis
 - `numpy` - Numerical computing
 - `flask` / `fastapi` - Web frameworks
 - `jupyter` - Jupyter notebooks
+
+**Home Assistant CLI**:
+- `ha` - Official Home Assistant CLI (install with `persist-install --ha-cli`)
+  - Downloads from: https://github.com/home-assistant/cli
+  - Provides commands: `ha core`, `ha supervisor`, `ha addons`, etc.
+  - Alternative: Use Supervisor REST API (`http://supervisor/`) with `$SUPERVISOR_TOKEN`
+  - See `scripts/ha-api-examples.sh` for API usage examples
 
 ### Auto-Install Configuration
 
