@@ -1,8 +1,8 @@
 ---
-name: "Claude Terminal"
-description: "Terminal interface for Anthropic's Claude Code CLI with persistent auth"
+name: "Claude Terminal Pro"
+description: "Enhanced terminal interface for Anthropic's Claude Code CLI with persistent auth and package management. Fork of heytcass/home-assistant-addons"
 version: "1.4.0"
-slug: "claude_terminal"
+slug: "claude_terminal_pro"
 init: false
 
 # Supported architectures
@@ -12,13 +12,13 @@ arch:
   - armv7
 
 # External resources
-url: "https://github.com/anthropics/claude-code"
+url: "https://github.com/esjavadex/claude-code-ha"
 
 # Web interface configuration
 ingress: true
 ingress_port: 7681
-panel_icon: mdi:code-braces
-panel_title: "Claude Terminal"
+panel_icon: mdi:code-braces-box
+panel_title: "Claude Terminal Pro"
 panel_admin: true
 
 # Port configuration

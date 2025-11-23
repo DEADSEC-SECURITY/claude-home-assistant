@@ -1,15 +1,18 @@
-# Claude Terminal
+# Claude Terminal Pro
 
-A terminal interface for Anthropic's Claude Code CLI in Home Assistant.
+An enhanced terminal interface for Anthropic's Claude Code CLI in Home Assistant.
 
 ## About
 
-This add-on provides a web-based terminal with Claude Code CLI pre-installed, allowing you to access Claude's powerful AI capabilities directly from your Home Assistant dashboard. The terminal provides full access to Claude's code generation, explanation, and problem-solving capabilities.
+Claude Terminal Pro is an enhanced fork of the original Claude Terminal add-on, providing a web-based terminal with Claude Code CLI pre-installed plus persistent package management capabilities. Access Claude's powerful AI capabilities directly from your Home Assistant dashboard with the added benefit of installing and persisting custom packages across restarts.
 
 ## Installation
 
-1. Add this repository to your Home Assistant add-on store
-2. Install the Claude Terminal add-on
+1. Add this repository to your Home Assistant add-on store:
+   - Go to Settings → Add-ons → Add-on Store
+   - Click the menu (⋮) and select Repositories
+   - Add: `https://github.com/esjavadex/claude-code-ha`
+2. Install the Claude Terminal Pro add-on
 3. Start the add-on
 4. Click "OPEN WEB UI" to access the terminal
 5. On first use, follow the OAuth prompts to log in to your Anthropic account
@@ -40,12 +43,19 @@ The terminal starts directly in your `/config` directory, giving you immediate a
 
 ## Features
 
+### Core Features
 - **Web Terminal**: Access a full terminal environment via your browser
 - **Auto-Launching**: Claude starts automatically when you open the terminal
 - **Claude AI**: Access Claude's AI capabilities for programming, troubleshooting and more
 - **Direct Config Access**: Terminal starts in `/config` for immediate access to all Home Assistant files
 - **Simple Setup**: Uses OAuth for easy authentication
 - **Home Assistant Integration**: Access directly from your dashboard
+
+### Enhanced Features (Pro)
+- **Persistent Packages**: Install system (APK) and Python (pip) packages that survive restarts
+- **Auto-Install Configuration**: Set packages to auto-install on startup
+- **Simple Management**: Use `persist-install` command for easy package installation
+- **Python Virtual Environment**: Isolated Python environment in `/data/packages`
 
 ## Troubleshooting
 
@@ -56,4 +66,7 @@ The terminal starts directly in your `/config` directory, giving you immediate a
 
 ## Credits
 
-This add-on was created with the assistance of Claude Code itself! The development process, debugging, and documentation were all completed using Claude's AI capabilities - a perfect demonstration of what this add-on can help you accomplish.
+**Original Creator:** Tom Cassady ([@heytcass](https://github.com/heytcass))
+**Fork Maintainer:** Javier Santos ([@esjavadex](https://github.com/esjavadex))
+
+This add-on was created and enhanced with the assistance of Claude Code itself! The development process, debugging, and documentation were all completed using Claude's AI capabilities - a perfect demonstration of what this add-on can help you accomplish.

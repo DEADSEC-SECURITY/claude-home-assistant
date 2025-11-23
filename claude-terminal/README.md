@@ -1,14 +1,16 @@
-# Claude Terminal for Home Assistant
+# Claude Terminal Pro for Home Assistant
 
-A secure, web-based terminal with Claude Code CLI pre-installed for Home Assistant.
+An enhanced, web-based terminal with Claude Code CLI and persistent package management for Home Assistant.
 
-![Claude Terminal Screenshot](https://github.com/heytcass/home-assistant-addons/raw/main/claude-terminal/screenshot.png)
+![Claude Terminal Screenshot](screenshot.png)
 
-*Claude Terminal running in Home Assistant*
+*Claude Terminal Pro running in Home Assistant*
 
-## What is Claude Terminal?
+> **Fork Attribution:** This is an enhanced fork of [heytcass/home-assistant-addons](https://github.com/heytcass/home-assistant-addons) by Tom Cassady, maintained by Javier Santos ([@esjavadex](https://github.com/esjavadex)).
 
-This add-on provides a web-based terminal interface with Claude Code CLI pre-installed, allowing you to use Claude's powerful AI capabilities directly from your Home Assistant dashboard. It gives you direct access to Anthropic's Claude AI assistant through a terminal, ideal for:
+## What is Claude Terminal Pro?
+
+This add-on provides a web-based terminal interface with Claude Code CLI pre-installed plus persistent package management, allowing you to use Claude's powerful AI capabilities directly from your Home Assistant dashboard. It gives you direct access to Anthropic's Claude AI assistant through a terminal, ideal for:
 
 - Writing and editing code
 - Debugging problems
@@ -17,16 +19,24 @@ This add-on provides a web-based terminal interface with Claude Code CLI pre-ins
 
 ## Features
 
+### Core Features
 - **Web Terminal Interface**: Access Claude through a browser-based terminal using ttyd
 - **Auto-Launch**: Claude starts automatically when you open the terminal
 - **Latest Claude Code CLI**: Pre-installed with Anthropic's official CLI (@latest)
 - **No Configuration Needed**: Uses OAuth authentication for easy setup
 - **Direct Config Access**: Terminal starts in your `/config` directory for immediate access to all Home Assistant files
 - **Home Assistant Integration**: Access directly from your dashboard
-- **Panel Icon**: Quick access from the sidebar with the code-braces icon
+- **Panel Icon**: Quick access from the sidebar with the code-braces-box icon
 - **Multi-Architecture Support**: Works on amd64, aarch64, and armv7 platforms
 - **Secure Credential Management**: Persistent authentication with safe credential storage
 - **Automatic Recovery**: Built-in fallbacks and error handling for reliable operation
+
+### Enhanced Features (Pro)
+- **Persistent Package Management**: Install APK and pip packages that survive container restarts
+- **Auto-Install Configuration**: Configure packages to install automatically on startup
+- **Python Virtual Environment**: Isolated Python environment in `/data/packages`
+- **Simple Commands**: Use `persist-install` for easy package management
+- **Persistent Storage**: All packages stored in `/data` which survives all reboots
 
 ## Quick Start
 
@@ -51,8 +61,11 @@ claude-logout
 
 ## Installation
 
-1. Add this repository to your Home Assistant add-on store
-2. Install the Claude Terminal add-on
+1. Add this repository to your Home Assistant add-on store:
+   - Go to Settings → Add-ons → Add-on Store
+   - Click the menu (⋮) and select Repositories
+   - Add: `https://github.com/esjavadex/claude-code-ha`
+2. Install the Claude Terminal Pro add-on
 3. Start the add-on
 4. Click "OPEN WEB UI" or the sidebar icon to access
 5. On first use, follow the OAuth prompts to log in to your Anthropic account
@@ -159,7 +172,10 @@ For detailed usage instructions, see the [documentation](DOCS.md).
 
 ## Credits
 
-This add-on was created with the assistance of Claude Code itself! The development process, debugging, and documentation were all completed using Claude's AI capabilities - a perfect demonstration of what this add-on can help you accomplish.
+**Original Creator:** Tom Cassady ([@heytcass](https://github.com/heytcass)) - Created the initial Claude Terminal add-on
+**Fork Maintainer:** Javier Santos ([@esjavadex](https://github.com/esjavadex)) - Added persistent package management and enhancements
+
+This add-on was created and enhanced with the assistance of Claude Code itself! The development process, debugging, and documentation were all completed using Claude's AI capabilities - a perfect demonstration of what this add-on can help you accomplish.
 
 ## License
 

@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains Home Assistant add-ons, specifically the **Claude Terminal** add-on which provides a web-based terminal interface with Claude Code CLI pre-installed. The add-on allows Home Assistant users to access Claude AI capabilities directly from their dashboard.
+This repository contains Home Assistant add-ons, specifically the **Claude Terminal Pro** add-on which provides a web-based terminal interface with Claude Code CLI pre-installed and persistent package management. The add-on allows Home Assistant users to access Claude AI capabilities directly from their dashboard.
+
+**Fork Attribution:** This is an enhanced fork of [heytcass/home-assistant-addons](https://github.com/heytcass/home-assistant-addons) by Tom Cassady, maintained by Javier Santos ([@esjavadex](https://github.com/esjavadex)). The fork adds persistent package management, auto-install configuration, and enhanced documentation.
 
 ## Development Environment
 
@@ -18,7 +20,7 @@ direnv allow
 ```
 
 ### Core Development Commands
-- `build-addon` - Build the Claude Terminal add-on with Podman
+- `build-addon` - Build the Claude Terminal Pro add-on with Podman
 - `run-addon` - Run add-on locally on port 7681 with volume mapping
 - `lint-dockerfile` - Lint Dockerfile using hadolint
 - `test-endpoint` - Test web endpoint availability (curl localhost:7681)
@@ -26,10 +28,10 @@ direnv allow
 ### Manual Commands (without aliases)
 ```bash
 # Build
-podman build --build-arg BUILD_FROM=ghcr.io/home-assistant/amd64-base:3.19 -t local/claude-terminal ./claude-terminal
+podman build --build-arg BUILD_FROM=ghcr.io/home-assistant/amd64-base:3.19 -t local/claude-terminal-pro ./claude-terminal
 
 # Run locally
-podman run -p 7681:7681 -v $(pwd)/config:/config local/claude-terminal
+podman run -p 7681:7681 -v $(pwd)/config:/config local/claude-terminal-pro
 
 # Lint
 hadolint ./claude-terminal/Dockerfile
