@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.4
+
+### ✨ New Feature - Git Pre-installed
+- **Git version control included in base image**: Git is now pre-installed in the Docker container
+  - No need to use `persist-install git` anymore
+  - Available immediately on fresh installs
+  - Enables version control workflows within the terminal
+
 ## 1.7.1
 
 ### ✨ Improvement - Auto-Copy & Focus for Image Uploads
