@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+### 🐛 Bug Fix - Build Error
+- **Removed unpublished plugin from Dockerfile**: Fixed Docker build failure
+  - Plugin `@ESJavadex/claude-homeassistant-plugins` not yet in registry
+  - Plugins now recommended for manual installation
+  - Build process works correctly again
+
 ## 2.0.0
 
 ### 🎉 Major Release - Enhanced Developer Experience
