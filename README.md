@@ -64,6 +64,14 @@ A web-based terminal interface with Claude Code CLI pre-installed and enhanced p
 - `persistent_apk_packages`: System packages to auto-install
 - `persistent_pip_packages`: Python packages to auto-install
 
+#### Recommended Plugins
+
+For an enhanced Claude Code experience with Home Assistant, we recommend installing the **Claude Home Assistant Plugins**:
+
+**[https://github.com/ESJavadex/claude-homeassistant-plugins](https://github.com/ESJavadex/claude-homeassistant-plugins)**
+
+These plugins provide Claude Code with specialized tools and context for Home Assistant development, including entity management, automation helpers, and more.
+
 [Documentation](claude-terminal/DOCS.md)
 
 ## Support
