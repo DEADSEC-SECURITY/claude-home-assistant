@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.0.3
+
+### ✨ New Features - Enhanced Developer Toolkit
+- **Pre-installed Python libraries**: Common libraries for Home Assistant scripting
+  - `py3-requests` - HTTP library for API calls
+  - `py3-aiohttp` - Async HTTP client/server
+  - `py3-yaml` - YAML parsing for HA configuration
+  - `py3-beautifulsoup4` - HTML/XML parsing
+- **Additional system tools**: More utilities available out-of-the-box
+  - `vim` - Advanced text editor
+  - `wget` - File download utility
+  - `tree` - Directory tree visualization
+  - `yq` - YAML processor (essential for Home Assistant configs)
+
+### 📚 Documentation
+- **Community Tools section**: Added links to community-built tools in README
+  - Featured: `ha-ws-client-go` by @schoolboyqueue for WebSocket API access
+
+### 🔗 PR Attribution
+- Incorporates contributions from PR #1 (adapted to current codebase)
+
 ## 2.0.2
 
 ### 🐛 Bug Fix - Claude CLI Launch Failure
