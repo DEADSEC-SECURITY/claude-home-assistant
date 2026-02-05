@@ -1,7 +1,7 @@
 ---
 name: "Claude Home Assistant"
 description: "HA-expert Claude Code with MCP API tools for entity control, auto-discovery, YAML knowledge, and full Home Assistant integration."
-version: "2.1.3"
+version: "2.1.4"
 slug: "claude_terminal_pro"
 init: false
 

@@ -123,19 +123,21 @@ PROFILE_EOF
         bashio::log.info "  - API key authentication: not set (using OAuth)"
     fi
 
-    # Setup custom secrets (KEY=VALUE format, exported as env vars)
-    local secrets
-    secrets=$(bashio::config 'secrets' '[]')
-    if [ "$secrets" != "[]" ] && [ "$secrets" != "" ] && [ "$secrets" != "null" ]; then
-        bashio::log.info "  - Secrets:"
-        echo "$secrets" | jq -c '.[]' | while IFS= read -r item; do
+    # Setup custom secrets ({name, value} objects, exported as env vars)
+    local secrets_count
+    secrets_count=$(bashio::config 'secrets | length' 2>/dev/null || echo "0")
+    if [ "$secrets_count" -gt 0 ] 2>/dev/null; then
+        bashio::log.info "  - Secrets: ${secrets_count} configured"
+        local i=0
+        while [ "$i" -lt "$secrets_count" ]; do
             local key value
-            key=$(echo "$item" | jq -r '.name // empty')
-            value=$(echo "$item" | jq -r '.value // empty')
-            if [ -n "$key" ] && [ -n "$value" ]; then
+            key=$(bashio::config "secrets[${i}].name" 2>/dev/null || true)
+            value=$(bashio::config "secrets[${i}].value" 2>/dev/null || true)
+            if [ -n "$key" ] && [ "$key" != "null" ] && [ -n "$value" ] && [ "$value" != "null" ]; then
                 export "$key"="$value"
                 bashio::log.info "    - ${key} = ****"
             fi
+            i=$((i + 1))
         done
     fi
 
@@ -451,15 +453,16 @@ persist_secrets() {
     fi
 
     # Generic secrets ({name, value} objects)
-    local secrets
-    secrets=$(bashio::config 'secrets' '[]')
     rm -f /data/.secrets_env
-    if [ "$secrets" != "[]" ] && [ "$secrets" != "" ] && [ "$secrets" != "null" ]; then
-        echo "$secrets" | jq -c '.[]' | while IFS= read -r item; do
+    local secrets_count
+    secrets_count=$(bashio::config 'secrets | length' 2>/dev/null || echo "0")
+    if [ "$secrets_count" -gt 0 ] 2>/dev/null; then
+        local i=0
+        while [ "$i" -lt "$secrets_count" ]; do
             local key value
-            key=$(echo "$item" | jq -r '.name // empty')
-            value=$(echo "$item" | jq -r '.value // empty')
-            if [ -n "$key" ] && [ -n "$value" ]; then
+            key=$(bashio::config "secrets[${i}].name" 2>/dev/null || true)
+            value=$(bashio::config "secrets[${i}].value" 2>/dev/null || true)
+            if [ -n "$key" ] && [ "$key" != "null" ] && [ -n "$value" ] && [ "$value" != "null" ]; then
                 echo "${key}=${value}" >> /data/.secrets_env
 
                 # Auto-detect known tokens and set up integrations
@@ -473,6 +476,7 @@ persist_secrets() {
                         ;;
                 esac
             fi
+            i=$((i + 1))
         done
         if [ -f /data/.secrets_env ]; then
             chmod 600 /data/.secrets_env
