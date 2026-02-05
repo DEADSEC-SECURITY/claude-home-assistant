@@ -133,8 +133,10 @@ PROFILE_EOF
             local key value
             key=$(bashio::config "secrets[${i}].name" 2>/dev/null || true)
             value=$(bashio::config "secrets[${i}].value" 2>/dev/null || true)
+            # Trim leading/trailing whitespace from key
+            key=$(echo "$key" | xargs)
             if [ -n "$key" ] && [ "$key" != "null" ] && [ -n "$value" ] && [ "$value" != "null" ]; then
-                export "$key"="$value"
+                export "${key}=${value}"
                 bashio::log.info "    - ${key} = ****"
             fi
             i=$((i + 1))
@@ -462,6 +464,8 @@ persist_secrets() {
             local key value
             key=$(bashio::config "secrets[${i}].name" 2>/dev/null || true)
             value=$(bashio::config "secrets[${i}].value" 2>/dev/null || true)
+            # Trim leading/trailing whitespace from key
+            key=$(echo "$key" | xargs)
             if [ -n "$key" ] && [ "$key" != "null" ] && [ -n "$value" ] && [ "$value" != "null" ]; then
                 echo "${key}=${value}" >> /data/.secrets_env
 
