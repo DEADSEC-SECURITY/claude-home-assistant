@@ -99,16 +99,10 @@ if [ -f "/data/.anthropic_api_key" ]; then
     export ANTHROPIC_API_KEY=$(cat /data/.anthropic_api_key)
 fi
 
-# GitHub token if configured
-if [ -f "/data/.github_token" ]; then
-    export GITHUB_TOKEN=$(cat /data/.github_token)
-    export GH_TOKEN=$(cat /data/.github_token)
-fi
-
-# Custom env vars if configured
-if [ -f "/data/.custom_env" ]; then
+# Custom secrets if configured (KEY=VALUE pairs)
+if [ -f "/data/.secrets_env" ]; then
     set -a
-    . /data/.custom_env
+    . /data/.secrets_env
     set +a
 fi
 
@@ -129,24 +123,15 @@ PROFILE_EOF
         bashio::log.info "  - API key authentication: not set (using OAuth)"
     fi
 
-    # Setup GitHub token if provided
-    local gh_token
-    gh_token=$(bashio::config 'github_token' '')
-    if [ -n "$gh_token" ] && [ "$gh_token" != "null" ] && [ "$gh_token" != "" ]; then
-        export GITHUB_TOKEN="$gh_token"
-        export GH_TOKEN="$gh_token"
-        bashio::log.info "  - GitHub token: configured"
-    fi
-
-    # Setup custom environment variables
-    local env_vars
-    env_vars=$(bashio::config 'env_vars' '[]')
-    if [ "$env_vars" != "[]" ] && [ "$env_vars" != "" ] && [ "$env_vars" != "null" ]; then
-        bashio::log.info "  - Custom env vars:"
-        echo "$env_vars" | jq -r '.[]' | while IFS='=' read -r key value; do
+    # Setup custom secrets (KEY=VALUE format, exported as env vars)
+    local secrets
+    secrets=$(bashio::config 'secrets' '[]')
+    if [ "$secrets" != "[]" ] && [ "$secrets" != "" ] && [ "$secrets" != "null" ]; then
+        bashio::log.info "  - Secrets:"
+        echo "$secrets" | jq -r '.[]' | while IFS='=' read -r key value; do
             if [ -n "$key" ] && [ -n "$value" ]; then
                 export "$key"="$value"
-                bashio::log.info "    - ${key}=****"
+                bashio::log.info "    - ${key} = ****"
             fi
         done
     fi
@@ -452,7 +437,7 @@ run_auto_discovery() {
 
 # Persist secrets to /data so profile script can load them in all sessions
 persist_secrets() {
-    # Anthropic API key
+    # Anthropic API key (dedicated field)
     local api_key
     api_key=$(bashio::config 'anthropic_api_key' '')
     if [ -n "$api_key" ] && [ "$api_key" != "null" ] && [ "$api_key" != "" ]; then
@@ -462,35 +447,34 @@ persist_secrets() {
         rm -f /data/.anthropic_api_key
     fi
 
-    # GitHub token
-    local gh_token
-    gh_token=$(bashio::config 'github_token' '')
-    if [ -n "$gh_token" ] && [ "$gh_token" != "null" ] && [ "$gh_token" != "" ]; then
-        echo -n "$gh_token" > /data/.github_token
-        chmod 600 /data/.github_token
-        # Also authenticate gh CLI
-        echo "$gh_token" | gh auth login --with-token 2>/dev/null \
-            && bashio::log.info "GitHub CLI authenticated" \
-            || bashio::log.warning "GitHub CLI auth failed (gh may not be installed yet)"
-    else
-        rm -f /data/.github_token
-    fi
-
-    # Custom env vars (KEY=VALUE format)
-    local env_vars
-    env_vars=$(bashio::config 'env_vars' '[]')
-    if [ "$env_vars" != "[]" ] && [ "$env_vars" != "" ] && [ "$env_vars" != "null" ]; then
-        rm -f /data/.custom_env
-        echo "$env_vars" | jq -r '.[]' | while IFS= read -r line; do
+    # Generic secrets (KEY=VALUE format)
+    local secrets
+    secrets=$(bashio::config 'secrets' '[]')
+    rm -f /data/.secrets_env
+    if [ "$secrets" != "[]" ] && [ "$secrets" != "" ] && [ "$secrets" != "null" ]; then
+        echo "$secrets" | jq -r '.[]' | while IFS= read -r line; do
             if echo "$line" | grep -q '='; then
-                echo "$line" >> /data/.custom_env
+                echo "$line" >> /data/.secrets_env
+
+                # Auto-detect known tokens and set up integrations
+                local key="${line%%=*}"
+                local value="${line#*=}"
+                case "$key" in
+                    GITHUB_TOKEN|GH_TOKEN)
+                        echo "$value" | gh auth login --with-token 2>/dev/null \
+                            && bashio::log.info "GitHub CLI auto-authenticated from secrets" \
+                            || true
+                        # Ensure both vars are set
+                        echo "GITHUB_TOKEN=${value}" >> /data/.secrets_env
+                        echo "GH_TOKEN=${value}" >> /data/.secrets_env
+                        ;;
+                esac
             fi
         done
-        if [ -f /data/.custom_env ]; then
-            chmod 600 /data/.custom_env
+        if [ -f /data/.secrets_env ]; then
+            chmod 600 /data/.secrets_env
+            bashio::log.info "Secrets persisted to /data/.secrets_env"
         fi
-    else
-        rm -f /data/.custom_env
     fi
 }
 
