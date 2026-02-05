@@ -64,7 +64,7 @@ RUN case "${TARGETARCH}" in \
 RUN case "${TARGETARCH}" in \
         amd64)   GH_ARCH="amd64" ;; \
         arm64)   GH_ARCH="arm64" ;; \
-        arm)     GH_ARCH="armv7" ;; \
+        arm)     GH_ARCH="armv6" ;; \
         386)     GH_ARCH="386" ;; \
         *)       echo "Unsupported architecture for gh: ${TARGETARCH}" && exit 1 ;; \
     esac && \
