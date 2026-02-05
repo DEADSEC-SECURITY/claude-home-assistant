@@ -1,0 +1,22 @@
+configuration:
+  auto_launch_claude:
+    name: Auto-launch Claude
+    description: Automatically start Claude Code when opening the terminal. Disable to show the session picker menu instead.
+  dangerously_skip_permissions:
+    name: Skip permission prompts
+    description: Run Claude Code with --dangerously-skip-permissions. Skips all confirmation prompts for file edits, bash commands, and MCP tool calls.
+  anthropic_api_key:
+    name: Anthropic API Key
+    description: Your Anthropic API key for Claude. Leave empty to use OAuth (browser login) instead.
+  auto_discover:
+    name: Auto-discover HA setup
+    description: On startup, scan your Home Assistant instance and generate a context file with your entities, areas, devices, and automations.
+  secrets:
+    name: Secrets / Environment Variables
+    description: Custom secrets exported as environment variables. Claude and all terminal sessions can access these. GitHub tokens (GITHUB_TOKEN) will auto-authenticate the gh CLI.
+  persistent_apk_packages:
+    name: System packages (APK)
+    description: Alpine Linux packages to auto-install on every startup (e.g. gcc, make, openssh).
+  persistent_pip_packages:
+    name: Python packages (pip)
+    description: Python packages to auto-install on every startup (e.g. requests, pandas, homeassistant).
