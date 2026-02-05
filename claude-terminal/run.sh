@@ -90,10 +90,31 @@ export PKG_CONFIG_PATH="/data/packages/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 if [ -d "/data/packages/python/venv" ]; then
     export VIRTUAL_ENV="/data/packages/python/venv"
 fi
+
+# Supervisor token for MCP server and HA API access
+export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
+
+# Anthropic API key if configured
+if [ -f "/data/.anthropic_api_key" ]; then
+    export ANTHROPIC_API_KEY=$(cat /data/.anthropic_api_key)
+fi
+
+# Increase MCP output token limit for large entity lists
+export MAX_MCP_OUTPUT_TOKENS=50000
 PROFILE_EOF
 
     chmod 644 /etc/profile.d/persistent-packages.sh
     bashio::log.info "  - Profile script created: /etc/profile.d/persistent-packages.sh"
+
+    # Setup Anthropic API key if provided
+    local api_key
+    api_key=$(bashio::config 'anthropic_api_key' '')
+    if [ -n "$api_key" ] && [ "$api_key" != "null" ] && [ "$api_key" != "" ]; then
+        export ANTHROPIC_API_KEY="$api_key"
+        bashio::log.info "  - API key authentication: configured"
+    else
+        bashio::log.info "  - API key authentication: not set (using OAuth)"
+    fi
 
     # Migrate any existing authentication files from legacy locations
     migrate_legacy_auth_files "$claude_config_dir"
@@ -366,6 +387,105 @@ run_health_check() {
     fi
 }
 
+# Deploy CLAUDE.md to /config for Claude Code to auto-load
+deploy_claude_md() {
+    local src="/opt/CLAUDE.md"
+    local dest="/config/CLAUDE.md"
+
+    if [ -f "$src" ]; then
+        cp "$src" "$dest"
+        chmod 644 "$dest"
+        bashio::log.info "CLAUDE.md deployed to /config/CLAUDE.md"
+    fi
+}
+
+# Run HA auto-discovery to generate context file
+run_auto_discovery() {
+    local auto_discover
+    auto_discover=$(bashio::config 'auto_discover' 'true')
+
+    if [ "$auto_discover" = "true" ]; then
+        bashio::log.info "Running HA auto-discovery..."
+        if [ -f "/opt/scripts/ha-discovery.sh" ]; then
+            chmod +x /opt/scripts/ha-discovery.sh
+            /opt/scripts/ha-discovery.sh || bashio::log.warning "Auto-discovery had errors but continuing..."
+        fi
+    else
+        bashio::log.info "Auto-discovery disabled in config"
+    fi
+}
+
+# Persist API key to /data so profile script can load it
+persist_api_key() {
+    local api_key
+    api_key=$(bashio::config 'anthropic_api_key' '')
+    if [ -n "$api_key" ] && [ "$api_key" != "null" ] && [ "$api_key" != "" ]; then
+        echo -n "$api_key" > /data/.anthropic_api_key
+        chmod 600 /data/.anthropic_api_key
+    else
+        rm -f /data/.anthropic_api_key
+    fi
+}
+
+# Register MCP server with Claude Code
+setup_mcp_server() {
+    bashio::log.info "Configuring Home Assistant MCP server..."
+
+    local mcp_server_path="/opt/ha-mcp-server/build/index.js"
+    if [ ! -f "$mcp_server_path" ]; then
+        bashio::log.error "MCP server not found at ${mcp_server_path}"
+        return 1
+    fi
+
+    local claude_json="${HOME}/.claude.json"
+
+    # Build the MCP config using jq
+    if [ -f "$claude_json" ]; then
+        local tmp_file
+        tmp_file=$(mktemp)
+        jq --arg token "$SUPERVISOR_TOKEN" '
+          .mcpServers["home-assistant"] = {
+            "type": "stdio",
+            "command": "node",
+            "args": ["/opt/ha-mcp-server/build/index.js"],
+            "env": {
+              "SUPERVISOR_TOKEN": $token
+            }
+          }
+        ' "$claude_json" > "$tmp_file" 2>/dev/null
+
+        if [ $? -eq 0 ]; then
+            mv "$tmp_file" "$claude_json"
+        else
+            rm -f "$tmp_file"
+            create_fresh_claude_json
+        fi
+    else
+        create_fresh_claude_json
+    fi
+
+    chmod 600 "$claude_json"
+    bashio::log.info "  MCP server 'home-assistant' registered in ${claude_json}"
+}
+
+create_fresh_claude_json() {
+    local claude_json="${HOME}/.claude.json"
+    cat > "$claude_json" << CJEOF
+{
+  "mcpServers": {
+    "home-assistant": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/opt/ha-mcp-server/build/index.js"],
+      "env": {
+        "SUPERVISOR_TOKEN": "${SUPERVISOR_TOKEN}"
+      }
+    }
+  }
+}
+CJEOF
+}
+
 # Main execution
 main() {
     bashio::log.info "Initializing Claude Terminal add-on..."
@@ -377,6 +497,10 @@ main() {
     install_tools
     setup_session_picker
     setup_persistent_packages
+    persist_api_key
+    deploy_claude_md
+    run_auto_discovery
+    setup_mcp_server
     start_web_terminal
 }
 

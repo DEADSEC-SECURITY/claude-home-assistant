@@ -86,6 +86,17 @@ RUN cd /opt/image-service \
     && npm cache clean --force \
     && chmod +x server.js
 
+# Copy and build HA MCP server
+COPY ha-mcp-server/ /opt/ha-mcp-server/
+RUN cd /opt/ha-mcp-server \
+    && npm install \
+    && npm run build \
+    && npm prune --production \
+    && npm cache clean --force
+
+# Copy HA expert CLAUDE.md template
+COPY CLAUDE.md /opt/CLAUDE.md
+
 # Copy startup script and modular scripts
 COPY run.sh /run.sh
 COPY scripts/ /opt/scripts/

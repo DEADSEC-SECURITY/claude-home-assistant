@@ -1,0 +1,22 @@
+{
+  "name": "ha-mcp-server",
+  "version": "1.0.0",
+  "description": "Home Assistant MCP server for Claude Code",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "ha-mcp-server": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0"
+  }
+}
