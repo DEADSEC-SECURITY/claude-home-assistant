@@ -1,182 +1,128 @@
-# Claude Terminal Pro for Home Assistant
+# Claude Home Assistant — Addon
 
-An enhanced, web-based terminal with Claude Code CLI and persistent package management for Home Assistant.
+HA-expert Claude Code with MCP API tools, auto-discovery, and full Home Assistant integration.
 
 ![Claude Terminal Screenshot](screenshot.png)
 
-*Claude Terminal Pro running in Home Assistant*
+## What Is This?
 
-> **Fork Attribution:** This is an enhanced fork of [heytcass/home-assistant-addons](https://github.com/heytcass/home-assistant-addons) by Tom Cassady, maintained by Javier Santos ([@esjavadex](https://github.com/esjavadex)).
+A Home Assistant addon that runs Claude Code in a web terminal — enhanced with:
 
-## What is Claude Terminal Pro?
-
-This add-on provides a web-based terminal interface with Claude Code CLI pre-installed plus persistent package management, allowing you to use Claude's powerful AI capabilities directly from your Home Assistant dashboard. It gives you direct access to Anthropic's Claude AI assistant through a terminal, ideal for:
-
-- Writing and editing code
-- Debugging problems
-- Learning new programming concepts
-- Creating Home Assistant scripts and automations
-
-## Features
-
-### Core Features
-- **Web Terminal Interface**: Access Claude through a browser-based terminal using ttyd
-- **Auto-Launch**: Claude starts automatically when you open the terminal
-- **Latest Claude Code CLI**: Pre-installed with Anthropic's official CLI (@latest)
-- **No Configuration Needed**: Uses OAuth authentication for easy setup
-- **Direct Config Access**: Terminal starts in your `/config` directory for immediate access to all Home Assistant files
-- **Home Assistant Integration**: Access directly from your dashboard
-- **Panel Icon**: Quick access from the sidebar with the code-braces-box icon
-- **Multi-Architecture Support**: Works on amd64, aarch64, and armv7 platforms
-- **Secure Credential Management**: Persistent authentication with safe credential storage
-- **Automatic Recovery**: Built-in fallbacks and error handling for reliable operation
-
-### Enhanced Features (Pro)
-- **Persistent Package Management**: Install APK and pip packages that survive container restarts
-- **Auto-Install Configuration**: Configure packages to install automatically on startup
-- **Python Virtual Environment**: Isolated Python environment in `/data/packages`
-- **Simple Commands**: Use `persist-install` for easy package management
-- **Persistent Storage**: All packages stored in `/data` which survives all reboots
+- **13 MCP tools** for direct HA API access (entities, services, areas, devices, logs, templates, etc.)
+- **CLAUDE.md** with deep HA expertise (YAML conventions, automation patterns, Jinja2, best practices)
+- **Auto-discovery** that scans your installation and gives Claude context about your specific setup
+- **API key auth** as an alternative to OAuth
+- **Persistent packages** (APK + pip) that survive container restarts
+- **Image paste support** for visual analysis
 
 ## Quick Start
 
-The terminal automatically starts Claude when you open it. You can immediately start using commands like:
+1. Install the addon (see [main README](../README.md) for repo setup)
+2. Set your `anthropic_api_key` in the addon configuration (or use OAuth)
+3. Start the addon and open the web UI
+4. Ask Claude to do things — it already knows your setup
 
-```bash
-# Ask Claude a question directly
-claude "How can I write a Python script to control my lights?"
-
-# Start an interactive session
-claude -i
-
-# Get help with available commands
-claude --help
-
-# Debug authentication if needed
-claude-auth debug
-
-# Log out and re-authenticate
-claude-logout
+```
+> What lights do I have in the living room?
+> Create an automation that notifies me when the dryer finishes
+> Show me the last 24 hours of bathroom humidity
+> Turn off all lights in the bedroom
 ```
 
-## Installation
+## Configuration Options
 
-1. Add this repository to your Home Assistant add-on store:
-   - Go to Settings → Add-ons → Add-on Store
-   - Click the menu (⋮) and select Repositories
-   - Add: `https://github.com/esjavadex/claude-code-ha`
-2. Install the Claude Terminal Pro add-on
-3. Start the add-on
-4. Click "OPEN WEB UI" or the sidebar icon to access
-5. On first use, follow the OAuth prompts to log in to your Anthropic account
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `anthropic_api_key` | password | `""` | Anthropic API key. Leave empty for OAuth. |
+| `auto_discover` | bool | `true` | Scan HA setup on startup and generate context |
+| `auto_launch_claude` | bool | `true` | Auto-start Claude or show session picker |
+| `dangerously_skip_permissions` | bool | `false` | Skip all permission prompts (MCP, file edits, bash) |
+| `persistent_apk_packages` | list | `[]` | System packages to auto-install on startup |
+| `persistent_pip_packages` | list | `[]` | Python packages to auto-install on startup |
 
-## Configuration
+## MCP Tools Reference
 
-The add-on requires no configuration. All settings are handled automatically:
+All tools are available automatically — Claude uses them when relevant.
 
-- **Port**: Web interface runs on port 7681
-- **Authentication**: OAuth with Anthropic (credentials stored securely in `/config/claude-config/`)
-- **Terminal**: Full bash environment with Claude Code CLI pre-installed
-- **Volumes**: Access to both `/config` (Home Assistant) and `/addons` (for development)
+| Tool | Description |
+|------|-------------|
+| `ha_get_entities` | List entities with states. Filter by domain (light, sensor, etc.) |
+| `ha_get_entity_state` | Detailed state + all attributes for one entity |
+| `ha_call_service` | Call any HA service (light.turn_on, notify.send, etc.) |
+| `ha_get_areas` | List all areas/rooms with entity counts |
+| `ha_get_devices` | List devices, optionally filtered by area |
+| `ha_get_automations` | List automations with on/off state and last triggered |
+| `ha_get_integrations` | List all installed integrations |
+| `ha_restart` | Restart HA Core (requires confirm=true) |
+| `ha_reload_config` | Reload a YAML domain (automation, script, scene, etc.) |
+| `ha_get_logs` | Recent HA logs for debugging |
+| `ha_get_history` | Entity state history over a time period |
+| `ha_fire_event` | Fire custom events for testing |
+| `ha_render_template` | Render Jinja2 templates in HA context |
+
+## How It Works
+
+On startup, the addon:
+
+1. **Deploys CLAUDE.md** to `/config/` — Claude Code auto-loads this as project instructions
+2. **Runs auto-discovery** — queries your HA instance and writes `/config/.claude/ha_context.md` with your entities, areas, devices, integrations, and automations
+3. **Registers the MCP server** — writes to `~/.claude.json` so Claude Code discovers the HA tools
+4. **Starts the web terminal** — ttyd serves a bash session that launches Claude Code
+
+## CLI Commands
+
+```bash
+claude                  # Start Claude Code (auto-launched by default)
+claude -i               # Interactive mode
+claude "your prompt"    # One-shot query
+persist-install <pkg>   # Install a package persistently
+ha core check           # Validate HA config before restart
+```
 
 ## Troubleshooting
 
-### Authentication Issues
-If you have authentication problems:
+**MCP tools not showing up:**
+- Check addon logs for "MCP server 'home-assistant' registered"
+- Run `/mcp` inside Claude Code to list available tools
+- Restart the addon to re-register
+
+**Authentication issues:**
 ```bash
-claude-auth debug    # Show credential status
-claude-logout        # Clear credentials and re-authenticate
+claude-auth debug       # Show credential status
+claude-logout           # Clear credentials and re-authenticate
 ```
 
-### Container Issues
-- Credentials are automatically saved and restored between restarts
-- Check add-on logs if the terminal doesn't load
-- Restart the add-on if Claude commands aren't recognized
-
-### Development
-For local development and testing:
-```bash
-# Enter development environment
-nix develop
-
-# Build and test locally
-build-addon
-run-addon
-
-# Lint and validate
-lint-dockerfile
-test-endpoint
-```
+**Auto-discovery failed:**
+- Check that `auto_discover` is `true` in config
+- Run manually: `/opt/scripts/ha-discovery.sh`
+- Check `/config/.claude/ha_context.md` was created
 
 ## Architecture
 
-- **Base Image**: Home Assistant Alpine Linux base (3.19)
-- **Container Runtime**: Compatible with Docker/Podman
-- **Web Terminal**: ttyd for browser-based access
-- **Process Management**: s6-overlay for reliable service startup
-- **Networking**: Ingress support with Home Assistant reverse proxy
-
-## Security
-
-Version 1.0.2 includes important security improvements:
-- ✅ **Secure Credential Management**: Limited filesystem access to safe directories only
-- ✅ **Safe Cleanup Operations**: No more dangerous system-wide file deletions
-- ✅ **Proper Permission Handling**: Consistent file permissions (600) for credentials
-- ✅ **Input Validation**: Enhanced error checking and bounds validation
-
-## Development Environment
-
-This add-on includes a comprehensive development setup using Nix:
-
-```bash
-# Available development commands
-build-addon      # Build the add-on container with Podman
-run-addon        # Run add-on locally on port 7681
-lint-dockerfile  # Lint Dockerfile with hadolint
-test-endpoint    # Test web endpoint availability
 ```
-
-**Requirements for development:**
-- NixOS or Nix package manager
-- Podman (automatically provided in dev shell)
-- Optional: direnv for automatic environment activation
-
-## Documentation
-
-For detailed usage instructions, see the [documentation](DOCS.md).
-
-## Version History
-
-### v1.0.2 (Current) - Security & Bug Fix Release
-- 🔒 **CRITICAL**: Fixed dangerous filesystem operations
-- 🐛 Added missing armv7 architecture support
-- 🔧 Pinned NPM packages and improved error handling
-- 🛠️ Enhanced development environment with Podman support
-
-### v1.0.1
-- Improved credential management
-- Enhanced startup reliability
-
-### v1.0.0
-- Initial stable release
-- Web terminal interface with ttyd
-- Pre-installed Claude Code CLI
-- OAuth authentication support
-
-## Useful Links
-
-- [Claude Code Documentation](https://docs.anthropic.com/claude/docs/claude-code)
-- [Get an Anthropic API Key](https://console.anthropic.com/)
-- [Claude Code GitHub Repository](https://github.com/anthropics/claude-code)
-- [Home Assistant Add-ons](https://www.home-assistant.io/addons/)
+claude-terminal/
+  config.yaml           # Addon manifest
+  Dockerfile            # Container build
+  run.sh                # Startup script (env, MCP registration, discovery)
+  CLAUDE.md             # HA expert knowledge (deployed to /config/)
+  ha-mcp-server/        # TypeScript MCP server
+    src/
+      index.ts          # 13 tool definitions
+      ha-client.ts      # Shared HTTP client for HA API
+  scripts/
+    ha-discovery.sh     # Auto-discovery script
+  image-service/        # Image upload/paste service
+```
 
 ## Credits
 
-**Original Creator:** Tom Cassady ([@heytcass](https://github.com/heytcass)) - Created the initial Claude Terminal add-on
-**Fork Maintainer:** Javier Santos ([@esjavadex](https://github.com/esjavadex)) - Added persistent package management and enhancements
+Built on the excellent work of:
 
-This add-on was created and enhanced with the assistance of Claude Code itself! The development process, debugging, and documentation were all completed using Claude's AI capabilities - a perfect demonstration of what this add-on can help you accomplish.
+- **Tom Cassady** ([@heytcass](https://github.com/heytcass)) — Original [Claude Terminal addon](https://github.com/heytcass/home-assistant-addons)
+- **Javier Santos** ([@ESJavadex](https://github.com/ESJavadex)) — Enhanced fork with persistent packages, image paste, session picker ([claude-code-ha](https://github.com/ESJavadex/claude-code-ha))
+
+This addon adds MCP API tools, HA expert knowledge, auto-discovery, and API key authentication on top of their work.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+MIT License

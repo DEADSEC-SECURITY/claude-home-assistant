@@ -1,6 +1,6 @@
 ---
-name: "Claude Terminal Pro"
-description: "HA-expert Claude Code CLI with MCP API tools, auto-discovery, persistent auth, package management, and image paste support. Fork of heytcass/home-assistant-addons"
+name: "Claude Home Assistant"
+description: "HA-expert Claude Code with MCP API tools for entity control, auto-discovery, YAML knowledge, and full Home Assistant integration."
 version: "2.1.0"
 slug: "claude_terminal_pro"
 init: false
@@ -12,13 +12,13 @@ arch:
   - armv7
 
 # External resources
-url: "https://github.com/esjavadex/claude-code-ha"
+url: "https://github.com/DEADSEC-SECURITY/claude-home-assistant"
 
 # Web interface configuration
 ingress: true
 ingress_port: 7680
 panel_icon: mdi:code-braces-box
-panel_title: "Claude Terminal Pro"
+panel_title: "Claude Home Assistant"
 panel_admin: true
 
 # Port configuration
