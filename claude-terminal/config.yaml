@@ -45,7 +45,8 @@ schema:
   anthropic_api_key: password?
   auto_discover: bool?
   secrets:
-    - password?
+    - name: str
+      value: password
   persistent_apk_packages:
     - str?
   persistent_pip_packages:

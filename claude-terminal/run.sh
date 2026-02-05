@@ -128,7 +128,10 @@ PROFILE_EOF
     secrets=$(bashio::config 'secrets' '[]')
     if [ "$secrets" != "[]" ] && [ "$secrets" != "" ] && [ "$secrets" != "null" ]; then
         bashio::log.info "  - Secrets:"
-        echo "$secrets" | jq -r '.[]' | while IFS='=' read -r key value; do
+        echo "$secrets" | jq -c '.[]' | while IFS= read -r item; do
+            local key value
+            key=$(echo "$item" | jq -r '.name // empty')
+            value=$(echo "$item" | jq -r '.value // empty')
             if [ -n "$key" ] && [ -n "$value" ]; then
                 export "$key"="$value"
                 bashio::log.info "    - ${key} = ****"
@@ -447,24 +450,24 @@ persist_secrets() {
         rm -f /data/.anthropic_api_key
     fi
 
-    # Generic secrets (KEY=VALUE format)
+    # Generic secrets ({name, value} objects)
     local secrets
     secrets=$(bashio::config 'secrets' '[]')
     rm -f /data/.secrets_env
     if [ "$secrets" != "[]" ] && [ "$secrets" != "" ] && [ "$secrets" != "null" ]; then
-        echo "$secrets" | jq -r '.[]' | while IFS= read -r line; do
-            if echo "$line" | grep -q '='; then
-                echo "$line" >> /data/.secrets_env
+        echo "$secrets" | jq -c '.[]' | while IFS= read -r item; do
+            local key value
+            key=$(echo "$item" | jq -r '.name // empty')
+            value=$(echo "$item" | jq -r '.value // empty')
+            if [ -n "$key" ] && [ -n "$value" ]; then
+                echo "${key}=${value}" >> /data/.secrets_env
 
                 # Auto-detect known tokens and set up integrations
-                local key="${line%%=*}"
-                local value="${line#*=}"
                 case "$key" in
                     GITHUB_TOKEN|GH_TOKEN)
                         echo "$value" | gh auth login --with-token 2>/dev/null \
                             && bashio::log.info "GitHub CLI auto-authenticated from secrets" \
                             || true
-                        # Ensure both vars are set
                         echo "GITHUB_TOKEN=${value}" >> /data/.secrets_env
                         echo "GH_TOKEN=${value}" >> /data/.secrets_env
                         ;;
