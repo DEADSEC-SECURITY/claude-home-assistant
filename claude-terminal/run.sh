@@ -305,7 +305,7 @@ get_claude_launch_command() {
 
     if [ "$auto_launch_claude" = "true" ]; then
         # Original behavior: auto-launch Claude directly
-        echo "clear && echo 'Welcome to Claude Terminal!' && echo '' && echo 'Starting Claude...' && sleep 1 && \$(which claude) ${claude_flags}"
+        echo "clear && echo 'Welcome to Claude Terminal!' && echo '' && echo 'Starting Claude...' && sleep 1 && exec /usr/local/bin/claude ${claude_flags}"
     else
         # New behavior: show interactive session picker
         if [ -f /usr/local/bin/claude-session-picker ]; then
@@ -313,7 +313,7 @@ get_claude_launch_command() {
         else
             # Fallback if session picker is missing
             bashio::log.warning "Session picker not found, falling back to auto-launch"
-            echo "clear && echo 'Welcome to Claude Terminal!' && echo '' && echo 'Starting Claude...' && sleep 1 && \$(which claude)"
+            echo "clear && echo 'Welcome to Claude Terminal!' && echo '' && echo 'Starting Claude...' && sleep 1 && exec /usr/local/bin/claude ${claude_flags}"
         fi
     fi
 }

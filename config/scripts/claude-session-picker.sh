@@ -40,19 +40,19 @@ get_user_choice() {
 launch_claude_new() {
     echo "🚀 Starting new Claude session..."
     sleep 1
-    exec claude
+    exec /usr/local/bin/claude
 }
 
 launch_claude_continue() {
     echo "⏩ Continuing most recent conversation..."
     sleep 1
-    exec claude -c
+    exec /usr/local/bin/claude -c
 }
 
 launch_claude_resume() {
     echo "📋 Opening conversation list for selection..."
     sleep 1
-    exec claude -r
+    exec /usr/local/bin/claude -r
 }
 
 launch_claude_custom() {
@@ -69,7 +69,7 @@ launch_claude_custom() {
         echo "🚀 Running: claude $custom_args"
         sleep 1
         # Use eval to properly handle quoted arguments
-        eval "exec claude $custom_args"
+        eval "exec /usr/local/bin/claude $custom_args"
     fi
 }
 

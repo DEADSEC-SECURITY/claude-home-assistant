@@ -39,7 +39,7 @@ manual_auth_input() {
     sleep 1
 
     # Try to pipe the code to Claude
-    echo "$auth_code" | claude
+    echo "$auth_code" | /usr/local/bin/claude
 }
 
 read_auth_from_file() {
@@ -59,7 +59,7 @@ read_auth_from_file() {
         sleep 1
 
         # Try to pipe the code to Claude
-        echo "$auth_code" | claude
+        echo "$auth_code" | /usr/local/bin/claude
 
         # Clean up the file after use
         rm -f "$auth_file"
@@ -86,7 +86,7 @@ retry_standard_auth() {
     echo "• On mobile, long-press may show paste option"
     echo ""
     sleep 2
-    exec claude
+    exec /usr/local/bin/claude
 }
 
 main() {

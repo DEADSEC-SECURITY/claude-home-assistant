@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.6
+
+### 🐛 Bug Fix - Auto-launch Claude Startup
+- **Fixed terminal hanging at `Starting Claude...`**: Auto-launch now executes `/usr/local/bin/claude` directly instead of passing the Claude shim through Node.js
+  - Restores Claude startup when reopening the Home Assistant app
+  - Keeps the session picker and authentication helper aligned on the absolute Claude executable path
+  - Updates docs to recommend `/usr/local/bin/claude` directly
+
 ## 2.0.5
 
 ### 🐛 Bug Fix - Claude CLI Not Found
